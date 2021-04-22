@@ -59,13 +59,15 @@ export default {
   // available, iOS does not support
   // clicks on body
   inserted (el: HTMLElement, binding: ClickOutsideDirective) {
+    const clickEvent = window['VUETIFY_ON_TOUCH'] == null ? 'click' : 'touchstart'
     const onClick = (e: Event) => directive(e as PointerEvent, el, binding)
+    console.log('[Vuetify:click-outside] setting-up click event', clickEvent)
     // iOS does not recognize click events on document
     // or body, this is the entire purpose of the v-app
     // component and [data-app], stop removing this
     const app = document.querySelector('[data-app]') ||
       document.body // This is only for unit tests
-    app.addEventListener('click', onClick, true)
+    app.addEventListener(clickEvent, onClick, true)
     el._clickOutside = onClick
   },
 

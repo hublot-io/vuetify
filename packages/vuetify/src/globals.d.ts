@@ -17,6 +17,7 @@ import { TouchStoredHandlers } from './directives/touch'
 declare global {
   interface Window {
     Vue: VueConstructor
+    VUETIFY_ON_TOUCH: Boolean
   }
 
   interface HTMLCollection {
