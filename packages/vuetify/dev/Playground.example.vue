@@ -1,11 +1,10 @@
 <template>
-  <v-app>
-  </v-app>
+  <v-app />
 </template>
 
 <script>
-  export default {
-    data: () => ({
-    })
-  }
+export default {
+  data: () => ({
+  })
+}
 </script>

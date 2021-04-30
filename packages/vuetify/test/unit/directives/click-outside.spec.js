@@ -3,7 +3,6 @@ import { test } from '@/test'
 import ClickOutside from '@/directives/click-outside'
 
 function bootstrap (args) {
-  let registeredHandler
   const el = document.createElement('div')
 
   const binding = {
@@ -11,81 +10,84 @@ function bootstrap (args) {
     args
   }
 
-  global.document.body.addEventListener = jest.fn((eventName, eventHandler, options) => {
-    registeredHandler = eventHandler
+  let clickHandler
+  let mousedownHandler
+  jest.spyOn(window.document.body, 'addEventListener').mockImplementation((eventName, eventHandler, options) => {
+    if (eventName === 'click') clickHandler = eventHandler
+    if (eventName === 'mousedown') mousedownHandler = eventHandler
   })
-  global.document.body.removeEventListener = jest.fn()
-
+  jest.spyOn(window.document.body, 'removeEventListener')
   ClickOutside.inserted(el, binding)
 
   return {
     callback: binding.value,
-    el,
-    registeredHandler
+    el: el,
+    clickHandler,
+    mousedownHandler,
   }
 }
 
 test('click-outside.js', () => {
   it('should register and unregister handler', () => {
-    const { registeredHandler, el } = bootstrap()
-    expect(global.document.body.addEventListener).toBeCalledWith('click', registeredHandler, true)
+    const { clickHandler, el } = bootstrap()
+    expect(global.document.body.addEventListener).toBeCalledWith('click', clickHandler, true)
 
     ClickOutside.unbind(el)
-    expect(global.document.body.removeEventListener).toBeCalledWith('click', registeredHandler, true)
+    expect(global.document.body.removeEventListener).toBeCalledWith('click', clickHandler, true)
   })
 
   it('should call the callback when closeConditional returns true', async () => {
-    const { registeredHandler, callback } = bootstrap({ closeConditional: () => true })
+    const { clickHandler, callback } = bootstrap({ closeConditional: () => true })
     const event = { target: document.createElement('div') }
 
-    registeredHandler(event)
+    clickHandler(event)
     await new Promise(resolve => setTimeout(resolve))
     expect(callback).toBeCalledWith(event)
   })
 
   it('should not call the callback when closeConditional returns false', async () => {
-    const { registeredHandler, callback, el } = bootstrap({ closeConditional: () => false })
+    const { clickHandler, callback, el } = bootstrap({ test: "lol", closeConditional: () => false })
 
-    registeredHandler({ target: el })
+    clickHandler({ target: el })
     await new Promise(resolve => setTimeout(resolve))
     expect(callback).not.toBeCalled()
   })
 
   it('should not call the callback when closeConditional is not provided', async () => {
-    const { registeredHandler, callback, el } = bootstrap()
+    const { clickHandler, callback, el } = bootstrap()
 
-    registeredHandler({ target: el })
+    clickHandler({ target: el })
     await new Promise(resolve => setTimeout(resolve))
     expect(callback).not.toBeCalled()
   })
 
   it('should not call the callback when clicked in element', async () => {
-    const { registeredHandler, callback, el } = bootstrap({ closeConditional: () => true })
+    const { clickHandler, callback, el } = bootstrap({ closeConditional: () => true })
 
-    registeredHandler({ target: el })
+    clickHandler({ target: el })
     await new Promise(resolve => setTimeout(resolve))
     expect(callback).not.toBeCalledWith()
   })
 
   it('should not call the callback when clicked in elements', async () => {
-    const { registeredHandler, callback, el } = bootstrap({
+    const { clickHandler, callback, el } = bootstrap({
       closeConditional: () => true,
       include: () => [el]
     })
 
-    registeredHandler({ target: document.createElement('div') })
+    clickHandler({ target: document.createElement('div') })
     await new Promise(resolve => setTimeout(resolve))
     expect(callback).not.toBeCalledWith()
   })
 
   it('should not call the callback when event is not fired by user action', async () => {
-    const { registeredHandler, callback } = bootstrap({ closeConditional: () => true })
+    const { clickHandler, callback } = bootstrap({ closeConditional: () => true })
 
-    registeredHandler({ isTrusted: false })
+    clickHandler({ isTrusted: false })
     await new Promise(resolve => setTimeout(resolve))
     expect(callback).not.toBeCalledWith()
 
-    registeredHandler({ pointerType: false })
+    clickHandler({ pointerType: false })
     await new Promise(resolve => setTimeout(resolve))
     expect(callback).not.toBeCalledWith()
   })

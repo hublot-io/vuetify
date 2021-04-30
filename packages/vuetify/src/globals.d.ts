@@ -21,7 +21,7 @@ declare global {
   }
 
   interface HTMLCollection {
-    [Symbol.iterator] (): IterableIterator<Element>
+    [Symbol.iterator](): IterableIterator<Element>
   }
 
   interface Element {
@@ -29,7 +29,11 @@ declare global {
   }
 
   interface HTMLElement {
-    _clickOutside?: EventListenerOrEventListenerObject
+    _clickOutside?: {
+      lastMousedownWasOutside: boolean
+      onClick: EventListener
+      onMousedown: EventListener
+    }
     _onResize?: {
       callback: () => void
       options?: boolean | AddEventListenerOptions
@@ -85,10 +89,10 @@ declare module 'vue/types/vue' {
     _isDestroyed: boolean
 
     /** bindObjectProps */
-    _b (data: VNodeData, tag: string, value: Dictionary<any> | Dictionary<any>[], asProp?: boolean, isSync?: boolean): VNodeData
+    _b(data: VNodeData, tag: string, value: Dictionary<any> | Dictionary<any>[], asProp?: boolean, isSync?: boolean): VNodeData
 
     /** bindObjectListeners */
-     _g (data: VNodeData, value: {}): VNodeData
+    _g(data: VNodeData, value: {}): VNodeData
   }
 
   export interface RawComponentOptions<
@@ -97,7 +101,7 @@ declare module 'vue/types/vue' {
     Methods = {} | undefined,
     Computed = {} | undefined,
     Props = {} | undefined
-  > {
+    > {
     name?: string
     data: Data
     methods: Methods
@@ -110,16 +114,16 @@ declare module 'vue/types/vue' {
   interface VueConstructor<
     V extends Vue = Vue,
     Options = Record<string, any>
-  > {
+    > {
     version: string
     /* eslint-disable-next-line camelcase */
     $_vuetify_subcomponents?: Record<string, VueConstructor>
     options: Options
 
-    extend<Data, Methods, Computed, Options, PropNames extends string = never> (options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames> & Options): OptionsVue<V, Data, Methods, Computed, Record<PropNames, any>, Options>
-    extend<Data, Methods, Computed, Props, Options> (options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props> & Options): OptionsVue<V, Data, Methods, Computed, Props, Options>
-    extend<Options, PropNames extends string = never> (definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]> & Options): OptionsVue<V, {}, {}, {}, Record<PropNames, any>, Options>
-    extend<Props, Options> (definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>> & Options): OptionsVue<V, {}, {}, {}, Props, Options>
-    extend<V extends Vue = Vue> (options?: ComponentOptions<V> & Options): OptionsVue<V, {}, {}, {}, {}, Options>
+    extend<Data, Methods, Computed, Options, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames> & Options): OptionsVue<V, Data, Methods, Computed, Record<PropNames, any>, Options>
+    extend<Data, Methods, Computed, Props, Options>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props> & Options): OptionsVue<V, Data, Methods, Computed, Props, Options>
+    extend<Options, PropNames extends string = never>(definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]> & Options): OptionsVue<V, {}, {}, {}, Record<PropNames, any>, Options>
+    extend<Props, Options>(definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>> & Options): OptionsVue<V, {}, {}, {}, Props, Options>
+    extend<V extends Vue = Vue>(options?: ComponentOptions<V> & Options): OptionsVue<V, {}, {}, {}, {}, Options>
   }
 }
